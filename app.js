@@ -1,14 +1,16 @@
 var express = require('express');
 var args = process.argv.join('|');
 var port = /\-\-port\|(\d+)(?:\||$)/.test(args) ? ~~RegExp.$1 : 8080;
-var daemon = /\-\-daemon\|true(?:\||$)/i.test(args) ? true : false;
+var php_exec = /\-\-php_exec\|(.+?)(?:\||$)/.test(args) ? ~~RegExp.$1 : 'php-cgi';
 var path = require('path');
 var DOCUMENT_ROOT = path.resolve(/\-\-root\|(.*?)(?:\||$)/.test(args) ? RegExp.$1 : process.cwd());
 var app = express();
 var phpcgi = require('node-phpcgi');
+var stream = process.stdout;
+var fs = require('fs');
 
 // logger
-daemon || app.use(require('morgan')('short'));
+app.use(require('morgan')('short'));
 
 // server.conf 功能
 // 支持 test/ 目录下面 .js js 脚本功能和 json 预览功能。
@@ -21,7 +23,8 @@ app.use(require('yog-devtools')({
 
 app.use(phpcgi({
   documentRoot: DOCUMENT_ROOT,
-  extensions: ['.php', '.phtml', '.ini']
+  extensions: ['.php', '.phtml', '.ini'],
+  handler: php_exec || 'php-cgi'
 }));
 
 // 静态文件输出
@@ -100,7 +103,8 @@ app.use(function(req, res, next) {
 app.use(phpcgi({
   documentRoot: DOCUMENT_ROOT,
   entryPoint: '/index.php',
-  includePath: '/'
+  includePath: '/',
+  handler: php_exec || 'php-cgi'
 }));
 
 // 错误捕获。
