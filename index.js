@@ -9,7 +9,7 @@ var fs = require('fs');
 // 因为如果使用 stdio pipe 的方式去开启子进程，当 master 进程退出后，子进程再有输出就会导致程序莫名的崩溃。
 // 解决办法是，让子进程的输出直接指向文件指针。
 // master 每隔一段时间去读文件，获取子进程输出。
-function watchFileChange(filepath, callback) {
+function watchOnFile(filepath, callback) {
   var lastIndex = 0;
 
   function read() {
@@ -93,7 +93,7 @@ function start(opt, callback) {
   var log = '';
   var started = false;
 
-  function onMessage(chunk) {
+  function onData(chunk) {
     if (started) {
       return;
     }
@@ -128,10 +128,10 @@ function start(opt, callback) {
       process.stdout.write(' at port [' + opt.port + ']\n');
 
       setTimeout(function() {
-        var address = 'http://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/');
+        var address = (opt.https ? 'https' : 'http') + '://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/');
 
         fis.log.notice('Browse %s', address.yellow.bold);
-        fis.log.notice('Or browse %s', ('http://' + util.hostname + (opt.port == 80 ? '/' : ':' + opt.port + '/')).yellow.bold);
+        fis.log.notice('Or browse %s', ((opt.https ? 'https' : 'http') + '://' + util.hostname + (opt.port == 80 ? '/' : ':' + opt.port + '/')).yellow.bold);
 
         console.log();
 
@@ -143,13 +143,7 @@ function start(opt, callback) {
   }
 
   if (opt.daemon) {
-    watchFileChange(logFile, onMessage);
-  } else {
-    server.stdout.on('data', onMessage);
-    server.stderr.on('data', onMessage);
-  }
-
-  if (opt.daemon) {
+    watchOnFile(logFile, onData);
     util.pid(server.pid);
     server.unref();
 
@@ -161,6 +155,8 @@ function start(opt, callback) {
   } else {
     server.stdout.pipe(process.stdout);
     server.stderr.pipe(process.stderr);
+    server.stdout.on('data', onData);
+    server.stderr.on('data', onData);
   }
 }
 
@@ -171,7 +167,7 @@ exports.start = function(opt, callback) {
       // seems ok
       start(opt, callback);
     } else {
-      callback('`php-cgi` is required.')
+      callback('`php-cgi` is required.');
     }
   });
 };
