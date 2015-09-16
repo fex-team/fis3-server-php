@@ -1,6 +1,6 @@
 {
   "name": "fis3-server-php",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "fis3 server php",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "dependencies": {
     "express": "4.10.1",
     "morgan": "1.6.1",
-    "node-phpcgi": "^0.3.4",
+    "node-phpcgi": "0.3.5",
     "serve-index": "1.5.0",
     "yog-devtools": "0.0.4"
   },
