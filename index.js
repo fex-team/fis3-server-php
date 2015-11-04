@@ -11,6 +11,7 @@ var fs = require('fs');
 // master 每隔一段时间去读文件，获取子进程输出。
 function watchOnFile(filepath, callback) {
   var lastIndex = 0;
+  var timer;
 
   function read() {
     var stat = fs.statSync(filepath);
@@ -19,17 +20,24 @@ function watchOnFile(filepath, callback) {
       var fd = fs.openSync(filepath, 'r');
       var buffer = new Buffer(stat.size - lastIndex);
 
-      fs.readSync(fd, buffer, lastIndex, stat.size - lastIndex);
-      var content = buffer.toString('utf8');
-      lastIndex = stat.size;
+      try {
+        fs.readSync(fd, buffer, lastIndex, stat.size - lastIndex);
+        var content = buffer.toString('utf8');
+        lastIndex = stat.size;
 
-      callback(content);
+        callback(content);
+      } catch (e) {
+        lastIndex = 0;
+      }
     }
 
     setTimeout(read, 200);
   }
 
   read();
+  return function() {
+    clearTimeout(timer);
+  };
 }
 
 function checkPHPEnable(opt, callback) {
@@ -92,6 +100,7 @@ function start(opt, callback) {
 
   var log = '';
   var started = false;
+  var stoper;
 
   function onData(chunk) {
     if (started) {
@@ -121,8 +130,10 @@ function start(opt, callback) {
 
       log && console.log(log);
       callback(errMsg);
+      stoper && stoper();
     } else if (~chunk.indexOf('Listening on')) {
       started = true;
+      stoper && stoper();
       clearTimeout(timeoutTimer);
 
       process.stdout.write(' at port [' + opt.port + ']\n');
@@ -143,7 +154,7 @@ function start(opt, callback) {
   }
 
   if (opt.daemon) {
-    watchOnFile(logFile, onData);
+    stoper = watchOnFile(logFile, onData);
     util.pid(server.pid);
     server.unref();
 
