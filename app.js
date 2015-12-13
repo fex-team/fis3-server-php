@@ -5,6 +5,7 @@ var https = /\-\-https\|(true)(?:\||$)/.test(args) ? !!RegExp.$1 : false;
 var php_exec = /\-\-php_exec\|(.+?)(?:\||$)/.test(args) ? ~~RegExp.$1 : 'php-cgi';
 var path = require('path');
 var DOCUMENT_ROOT = path.resolve(/\-\-root\|(.*?)(?:\||$)/.test(args) ? RegExp.$1 : process.cwd());
+var bodyParser = require('body-parser')
 var app = express();
 var phpcgi = require('node-phpcgi');
 var stream = process.stdout;
@@ -12,6 +13,12 @@ var fs = require('fs');
 
 // logger
 app.use(require('morgan')('short'));
+
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }))
+
+// parse application/json
+app.use(bodyParser.json())
 
 // server.conf 功能
 // 支持 test/ 目录下面 .js js 脚本功能和 json 预览功能。
