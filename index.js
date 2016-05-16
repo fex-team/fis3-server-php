@@ -138,18 +138,7 @@ function start(opt, callback) {
 
       process.stdout.write(' at port [' + opt.port + ']\n');
 
-      setTimeout(function() {
-        var address = (opt.https ? 'https' : 'http') + '://127.0.0.1' + (opt.port == 80 ? '/' : ':' + opt.port + '/');
-
-        fis.log.notice('Browse %s', address.yellow.bold);
-        fis.log.notice('Or browse %s', ((opt.https ? 'https' : 'http') + '://' + util.hostname + (opt.port == 80 ? '/' : ':' + opt.port + '/')).yellow.bold);
-
-        console.log();
-
-        opt.browse ? util.open(address, function() {
-          opt.daemon && process.exit();
-        }) : (opt.daemon && process.exit());
-      }, 200);
+      callback(null);
     }
   }
 
