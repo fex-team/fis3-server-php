@@ -25,8 +25,8 @@ app.use(bodyParser.json())
 // 注意这里面的.js，不是一般的.js 文件，而是相当于 express 的 route.
 app.use(require('yog-devtools')({
   view_path: '', // 避免报错。
-  rewrite_file: path.join(DOCUMENT_ROOT, 'config', 'server.conf'),
-  data_path: path.join(DOCUMENT_ROOT, 'test')
+  rewrite_file: [path.join(DOCUMENT_ROOT, 'config', 'server.conf'), path.join(DOCUMENT_ROOT, 'mock', 'server.conf')],
+  data_path: [path.join(DOCUMENT_ROOT, 'test'), path.join(DOCUMENT_ROOT, 'mock')]
 }));
 
 app.use(phpcgi({
