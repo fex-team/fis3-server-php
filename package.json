@@ -1,6 +1,6 @@
 {
   "name": "fis3-server-php",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "fis3 server php",
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,7 @@
     "morgan": "1.6.1",
     "node-phpcgi": "0.3.5",
     "serve-index": "1.5.0",
-    "yog-devtools": "0.1.0"
+    "yog-devtools": "~0.1.1"
   },
   "author": "fis",
   "license": "BSD",
